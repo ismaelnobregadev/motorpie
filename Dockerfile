@@ -12,7 +12,7 @@ COPY . /app
 
 RUN yarn build
 
-FROM nginx:alpine
+FROM nginxinc/nginx-unprivileged
 COPY --from=build /app/build /usr/share/nginx/html
 
 EXPOSE 80
