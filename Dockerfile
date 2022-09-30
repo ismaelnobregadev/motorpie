@@ -1,4 +1,4 @@
-FROM node:15.13-alpine
+FROM node:15.13-alpine as build
 WORKDIR /app
 
 ENV PATH="./node_modules/.bin:$PATH"
@@ -14,7 +14,7 @@ COPY . /app
 RUN yarn build
 
 
-FROM nginx:1.16.0-alpine as build
+FROM nginx:1.16.0-alpine
 COPY --from=build /usr/share/nginx/html .
 
 COPY nginx/nginx.conf /etc/nginx/conf.d
