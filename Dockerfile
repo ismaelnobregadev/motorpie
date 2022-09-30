@@ -1,28 +1,20 @@
 
-FROM node:alpine as build
+FROM node:16-alpine as builder
 
 WORKDIR /app
 
-COPY . /app
+COPY package.json .
 
-ENV PATH /app/node_modules/.bin:$PATH
+RUN npm install
 
-RUN yarn
+COPY . .
 
-RUN yarn build
+RUN npm run build
 
-FROM nginx:alpine
+FROM nginx
 
-COPY --from=build /app/build /usr/share/nginx/html
-# --------- only for those using react router ----------
-# if you are using react router 
-# you need to overwrite the default nginx configurations
-# remove default nginx configuration file
-RUN rm /etc/nginx/conf.d/default.conf
-# replace with custom one
-COPY nginx/nginx.conf /etc/nginx/conf.d
-# --------- /only for those using react router ----------
-# expose port 80 to the outer world
+COPY --from=builder /app/build /usr/share/nginx/html
+
 EXPOSE 80
 # start nginx 
 CMD ["nginx", "-g", "daemon off;"]
