@@ -1,20 +1,25 @@
-
-FROM node:16-alpine as builder
-
+FROM node:alpine as build
 WORKDIR /app
 
-COPY package.json .
+ENV PATH="./node_modules/.bin:$PATH"
 
-RUN npm install
 
-COPY . .
+COPY package.json /app/package.json
+COPY package-lock.json /app/package-lock.json
 
-RUN npm run build
+RUN yarn
 
-FROM nginx
+COPY . /app
 
-COPY --from=builder /app/build /usr/share/nginx/html
+RUN yarn build
+
+FROM nginx:alpine
+COPY --from=build /app/build /usr/share/nginx/html
+
+RUN rm /etc/nginx/conf.d/default.conf
+
+COPY nginx/nginx.conf /etc/nginx/conf.d
 
 EXPOSE 80
-# start nginx 
+
 CMD ["nginx", "-g", "daemon off;"]
